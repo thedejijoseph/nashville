@@ -41,7 +41,7 @@ def create_filename(name_prefix='data'):
   second = now.strftime("%S")
 
   timestamp = f"{year}{month}{day}-{minute}{second}"
-  return f"{name_prefix}-{timestamp}"
+  return f"{name_prefix}-{timestamp}.txt"
 
 def flatten_json(data, parent_key=''):
     """
@@ -64,7 +64,12 @@ def flatten_json(data, parent_key=''):
     return flattened_data
 
 def transform_period(object):
-    return object
+    if object == 'per annum':
+        return 'annually'
+    elif object == 'per month':
+        return 'monthly'
+    else:
+        return 'undefined'
 
 def transform_state(object):
     return object
@@ -117,9 +122,12 @@ def fetch_data(write_to='disk'):
                 r = requests.get(data_url, params=data_query)
                 raw_data = r.text
                 data = json.loads(raw_data)
-                if data['status'] == 'ok':
-                    apartments = json.dumps(data['adverts_list']['adverts'])
-                    f.write(apartments + '\n')
+                try:
+                    if data['status'] == 'ok':
+                        apartments = json.dumps(data['adverts_list']['adverts'])
+                        f.write(apartments + '\n')
+                except: 
+                    print(f'cannot parse page {i}')
     else:
         print(f'cannot write to {write_to}')
         return
