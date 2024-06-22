@@ -23,7 +23,7 @@ url_object = urlparse(DATA_URL)
 
 
 
-def create_filename(name_prefix='data'):
+def create_filename(name_prefix='data', file_ext='txt'):
   """
   Creates a new string in the format 'data-yymmdd-mmss'.
 
@@ -41,7 +41,7 @@ def create_filename(name_prefix='data'):
   second = now.strftime("%S")
 
   timestamp = f"{year}{month}{day}-{minute}{second}"
-  return f"{name_prefix}-{timestamp}.txt"
+  return f"{name_prefix}-{timestamp}.{file_ext}"
 
 def flatten_json(data, parent_key=''):
     """
@@ -77,6 +77,12 @@ def transform_state(object):
 def extract_apartment_data(advert_object):
     # source is an advert object
     source = flatten_json(advert_object)
+
+    labels = [
+        'price', 'period_raw', 'period', 'region_text', 'region', 'region_parent', 'state',
+        'description', 'title', 'slug', 'url', 'status', 'property_size', 'property_size_unit',
+        'furnished', 'bedrooms', 'bathrooms'
+        ]
     d = {}
 
     d['price'] = source.get('price_obj-value', None)
@@ -106,6 +112,11 @@ def extract_apartment_data(advert_object):
         if attr['name'] == 'Bathrooms':
            d['bathrooms'] = attr['value']
 
+    # replace non-existent fields with None
+    missing = set(labels) - set(d.keys())
+    for label in missing:
+        d[label] = None
+    
     return d
 
 def fetch_data(write_to='disk'):
@@ -132,9 +143,10 @@ def fetch_data(write_to='disk'):
         print(f'cannot write to {write_to}')
         return
 
-def read_data(source='disk'):
+def read_data(source='disk', filename=None):
     if source == 'disk':
-        filename = input("Enter the filename: ")
+        if not filename:
+            filename = input("enter the filename: ")
 
         all_objects = []
         with open(filename, "r") as f:

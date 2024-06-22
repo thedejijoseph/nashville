@@ -8,13 +8,16 @@ Project Nashville is setup to answer one question with the help of interactive
 data visualisation: what are the most expensive areas to live in Lagos?
 """
 
-import json
+import csv
 
+import pandas as pd
 from peewee import Model, PostgresqlDatabase
 from peewee import AutoField, IntegerField, TextField, ForeignKeyField
 from peewee import chunked
 
 from environs import Env
+
+import data_fetcher as dff
 
 env = Env()
 env.read_env()
@@ -99,9 +102,16 @@ def insert_all_apartments(all_apartments):
             ApartmentModel.insert_many(batch).execute()
     return
 
-
-
 def close_db():
     # close the database connection
     db.close()
+
+def to_csv(all_apartments):
+    csv_file_name = dff.create_filename(name_prefix='export', file_ext='csv')
+    
+    df = pd.DataFrame(all_apartments)
+
+    df['description'] = df['description'].replace('\n', '\\n')
+
+    df.to_csv(csv_file_name, index=False)
 
