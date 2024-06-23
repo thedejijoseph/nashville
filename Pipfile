@@ -8,6 +8,8 @@ requests = "*"
 environs = "*"
 psycopg2-binary = "*"
 peewee = "*"
+geopy = "*"
+pandas = "*"
 
 [dev-packages]
 ipython = "*"
