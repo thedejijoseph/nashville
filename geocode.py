@@ -127,12 +127,15 @@ def get_lga(x, y):
 def random_point_in_lga(lga):
     if lga != 'cannot-locate':
         lga = lgas[lga]
-        polygon = shape(lga['geometry'])
-        minx, miny, maxx, maxy = polygon.bounds
 
-        x = np.random.uniform(minx, maxx, 1)
-        y = np.random.uniform(miny, maxy, 1)
+        while True:
+            polygon = shape(lga['geometry'])
+            minx, miny, maxx, maxy = polygon.bounds
 
-        return {'x': x[0], 'y': y[0]}
+            x = np.random.uniform(minx, maxx, 1)
+            y = np.random.uniform(miny, maxy, 1)
+            point = Point(x, y)
+            if polygon.contains(point):
+                return {'x': x[0], 'y': y[0]}
     else: 
         return {'x': 0, 'y': 0}
