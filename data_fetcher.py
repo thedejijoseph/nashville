@@ -12,8 +12,9 @@ from datetime import datetime
 from urllib.parse import urlparse, parse_qs
 
 import requests
-
 from environs import Env
+
+import geocode
 
 env = Env()
 env.read_env()
@@ -81,7 +82,7 @@ def extract_apartment_data(advert_object):
     labels = [
         'price', 'period_raw', 'period', 'region_text', 'region', 'region_parent', 'state',
         'description', 'title', 'slug', 'url', 'status', 'property_size', 'property_size_unit',
-        'furnished', 'bedrooms', 'bathrooms'
+        'furnished', 'bedrooms', 'bathrooms', 'lat', 'long', 'lga', 'lga_lat', 'lga_long'
         ]
     d = {}
 
@@ -97,6 +98,16 @@ def extract_apartment_data(advert_object):
     d['slug'] = source.get('slug', None)
     d['url'] = source.get('url', None)
     d['status'] = source.get('category_slug', None)
+
+    # location data
+    approx_location = geocode.geocode(d['region_text'])
+    if approx_location:
+        d['lat'] = approx_location['y']
+        d['long'] = approx_location['x']
+        d['lga'] = geocode.get_lga(approx_location['x'], approx_location['y'])
+        random_point_in_lga = geocode.random_point_in_lga(d['lga'])
+        d['lga_lat'] = random_point_in_lga['y']
+        d['lga_long'] = random_point_in_lga['x']
 
     # attributes
     attributes = source.get('attrs')

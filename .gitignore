@@ -179,3 +179,4 @@ data-*
 *.csv
 *.geojson
 .DS_Store
+geocode-*

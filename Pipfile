@@ -11,6 +11,9 @@ peewee = "*"
 geopy = "*"
 pandas = "*"
 arcgis = "*"
+shapely = "*"
+folium = "*"
+numpy = "*"
 
 [dev-packages]
 ipython = "*"
